@@ -31,7 +31,7 @@ np::ndarray toPython(const cv::Mat &frame){
   int channels = frame.channels();
 
   assert(channels == 2);
-  assert(frame.isContinuous())
+  assert(frame.isContinuous());
 
   np::ndarray np_array = np::from_data(
     frame.data,
@@ -78,10 +78,12 @@ public:
   Flow(const Mat &img, int width=640, int height=360){
     init(img, width, height);
   }
-  Flow(py::object py_img){
+  Flow(py::object py_img, py::list wh){
     np::ndarray np_img = np::from_object(py_img);
     const Mat img = get_Mat(np_img);
-    init(img);
+    int width = py::extract<int>(wh[0]);
+    int height = py::extract<int>(wh[1]);
+    init(img, width, height);
   }
 };
 
@@ -128,7 +130,7 @@ np::ndarray Flow::get_py_flow(py::object py_img){
 BOOST_PYTHON_MODULE(cpp_flow){
   Py_Initialize();
   np::initialize();
-  py::class_<Flow>("Flow", py::init<py::object>())
+  py::class_<Flow>("Flow", py::init<py::object, py::list>())
     .def("get_flow", &Flow::get_py_flow)
   ;
 }
